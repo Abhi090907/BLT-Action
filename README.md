@@ -1,268 +1,236 @@
-# BLT-Action README
+# BLT-Action
 
-## Introduction
+BLT-Action is a GitHub Action designed to streamline issue and pull request management in GitHub repositories. It automates contributor assignment, tracks progress, rewards engagement, and maintains an organized workflow through comment-triggered commands, scheduled intervals, and manual triggers.
 
-**BLT-Action** is an innovative GitHub Action designed to streamline the issue and pull request management process in GitHub repositories. It provides a powerful suite of features to automatically assign users to issues, track progress, engage contributors, and maintain an organized workflow. The action runs on comment events, scheduled intervals, and can be manually triggered to ensure your repository stays organized and contributors stay engaged.
+---
+
+## Table of Contents
+
+- [Features](#features)
+- [How It Works](#how-it-works)
+- [Getting Started](#getting-started)
+- [Configuration](#configuration)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Implementation Details](#implementation-details)
+- [Contributing](#contributing)
+
+---
 
 ## Features
 
 ### Assignment Management
-- **Automatic Assignment**: Users can self-assign to issues using multiple natural language commands:
-  - `/assign`
-  - `assign to me`
-  - `assign this to me`
-  - `assign it to me`
-  - `assign me this`
-  - `work on this`
-  - `i can try fixing this`
-  - `i am interested in doing this`
-  - `be assigned this`
-  - `i am interested in contributing`
-- **Manual Unassignment**: Users can unassign themselves using `/unassign`.
-- **Assignment Validation**: Prevents users from being assigned to multiple issues without active pull requests.
-- **Smart PR Tracking**: Automatically checks for linked pull requests before unassigning users.
-- **Bot Protection**: Automatically filters out bot accounts and GitHub Apps from triggering assignment/unassignment commands, preventing automated tools from being assigned to issues.
+
+- **Self-Assignment**: Contributors can assign themselves to issues using natural language commands such as `/assign`, `assign to me`, `work on this`, or `i am interested in contributing`
+- **Manual Unassignment**: Contributors can release an issue by commenting `/unassign`
+- **Assignment Validation**: Prevents contributors from holding multiple issues simultaneously without an active pull request
+- **Smart PR Tracking**: Automatically checks for linked pull requests before unassigning contributors
+- **Bot Protection**: Filters out bot accounts and GitHub Apps from triggering assignment commands
 
 ### Automated Workflow Management
-- **Time-Based Unassignment**: Automatically unassigns users from issues after 24 hours of inactivity if no pull request is linked, keeping issues available for others.
-- **Smart Pull Request Detection**: Identifies cross-referenced open pull requests in issue timelines to avoid premature unassignment.
-- **Duplicate Prevention**: Avoids creating duplicate unassignment notifications by checking existing comments.
-- **Scheduled Execution**: Runs daily via cron schedule to check for stale assignments and maintain repository hygiene.
-- **Manual Triggers**: Supports workflow_dispatch for on-demand execution.
+
+- **Time-Based Unassignment**: Automatically releases issues after 24 hours of inactivity if no pull request is linked
+- **Smart Pull Request Detection**: Identifies cross-referenced open pull requests in issue timelines to prevent premature unassignment
+- **Duplicate Prevention**: Avoids creating duplicate unassignment notifications
+- **Scheduled Execution**: Runs daily via cron to check for stale assignments
+- **Manual Triggers**: Supports `workflow_dispatch` for on-demand execution
 
 ### Engagement Features
-- **GIF Integration**: Post GIFs from Giphy using `/giphy [search term]` to add fun and personality to discussions.
-- **Kudos System**: Send appreciation to contributors using `/kudos @username [optional message]` to recognize great work.
-  - Integrates with OWASP BLT team API to track and record kudos
-  - Provides confirmation when kudos are successfully sent
-  - Supports custom appreciation messages
-- **Tip System**: Support contributors financially using `/tip @username $amount` to send tips via GitHub Sponsors.
-  - Generates direct links to contributor's GitHub Sponsors page
-  - Validates GitHub Sponsors availability for the recipient
-  - Provides clear instructions for completing one-time payments
-  - Works on both issues and pull request comments
 
-### Compatibility & Branding
-- **Issue and PR Support**: Works on both issue comments and pull request review comments for maximum flexibility.
-- **Attribution**: All bot-generated comments include an attribution footer linking back to the BLT-Action repository for transparency and recognition.
-- **Built on Node.js 20**: Leverages the latest GitHub Actions runtime for reliability and performance.
+- **GIF Integration**: Post GIFs using `/giphy [search term]` powered by the Giphy API
+- **Kudos System**: Recognize contributors using `/kudos @username [message]` — integrates with the OWASP BLT platform to track acknowledgements
+- **Tip System**: Support contributors using `/tip @username $amount` — generates a direct GitHub Sponsors link for one-time payments
+
+---
 
 ## How It Works
 
-The BLT-Action operates through multiple triggers:
+BLT-Action operates through three trigger mechanisms:
 
-1. **Comment-Triggered Actions**: When users comment on issues with specific commands (`/assign`, `/unassign`), the action processes these commands immediately. These commands do not work for pull requests.
+**Comment-Triggered Actions**
+When a contributor comments a recognized command on an issue, the action processes it immediately. Assignment commands are restricted to issues only and do not apply to pull requests.
 
-2. **Scheduled Monitoring**: A daily cron job (configurable) checks all assigned issues for inactivity:
-   - Identifies issues assigned for more than 24 hours without updates
-   - Verifies if the issue has a linked pull request via cross-references
-   - Automatically unassigns inactive issues without PRs to keep them available
+**Scheduled Monitoring**
+A daily cron job checks all assigned issues for inactivity. Issues assigned for more than 24 hours without a linked pull request are automatically unassigned and made available to other contributors.
 
-3. **Smart Assignment Logic**:
-   - Prevents users from being assigned to multiple issues without active pull requests
-   - Blocks duplicate assignments to the same issue
-   - Validates existing assignments before allowing new ones
-   - Automatically adds and removes the "assigned" label for tracking
+**Smart Assignment Logic**
+The action prevents contributors from holding multiple issues without active pull requests, blocks duplicate assignments, and manages an `assigned` label automatically to reflect current issue status.
 
-4. **Engagement & Recognition**: Commands like `/giphy`, `/kudos`, and `/tip` work across both issues and pull requests, making it easy to keep discussions lively, recognize contributor efforts, and support them financially via GitHub Sponsors.
+---
 
 ## Getting Started
 
 ### Prerequisites
 
-- A GitHub account.
-- A GitHub repository where you have administrative privileges.
+- A GitHub account
+- A GitHub repository where you have administrative access
 
-### Configuration
+---
 
-#### Required Inputs
+## Configuration
+
+### Required Inputs
 
 | Parameter | Description |
 |-----------|-------------|
-| `repo-token` | GitHub token for authentication (use `${{ secrets.GITHUB_TOKEN }}`) |
-| `repository` | Repository identifier (use `${{ github.repository }}`) |
-| `giphy-api-key` | API key for Giphy integration (required for `/giphy` command) |
+| `repo-token` | GitHub token for authentication — use `${{ secrets.GITHUB_TOKEN }}` |
+| `repository` | Repository identifier — use `${{ github.repository }}` |
+| `giphy-api-key` | API key for Giphy integration — required only for the `/giphy` command |
 
-#### Setting Up Giphy API Key
+### Setting Up the Giphy API Key
 
-To use the `/giphy` command:
-1. Get a free API key from [Giphy Developers](https://developers.giphy.com/)
+1. Obtain a free API key from [Giphy Developers](https://developers.giphy.com/)
 2. Add it as a repository secret named `GIPHY_API_KEY`
-3. Reference it in your workflow as shown below
+3. Reference it in your workflow file as shown in the installation section below
 
-### Installation
+---
 
-1. **Add the Action to Your Repository**:
-   - Navigate to your GitHub repository.
-   - Create a `.github/workflows` directory if it doesn't exist.
-   - Create a new YAML file inside the workflows directory (e.g., `blt-action.yml`).
-   - Add the following content to the YAML file:
+## Installation
 
-    ```yml
-    name: Auto Assign Issues
-    
-    on:
-      # Trigger on new comments on issues
-      issue_comment:
-        types: [created]
-      # Trigger on new review comments on pull requests
-      pull_request_review_comment:
-        types: [created]
-      # Run daily at midnight UTC to check for stale assignments
-      schedule:
-        - cron: '0 0 * * *'
-      # Allow manual triggering from the Actions tab
-      workflow_dispatch:
-    
-    jobs:
-      auto-assign:
-        # Only run on relevant events to avoid unnecessary workflow runs
-        if: >
-          (github.event_name == 'issue_comment' && (
-          contains(github.event.comment.body, '/assign') || 
-          startsWith(github.event.comment.body, '/unassign') || 
-          startsWith(github.event.comment.body, '/giphy') || 
-          startsWith(github.event.comment.body, '/kudos') || 
-          startsWith(github.event.comment.body, '/tip') || 
-          contains(github.event.comment.body, 'assign to me') || 
-          contains(github.event.comment.body, 'assign this to me') || 
-          contains(github.event.comment.body, 'assign it to me') || 
-          contains(github.event.comment.body, 'assign me this') || 
-          contains(github.event.comment.body, 'work on this') || 
-          contains(github.event.comment.body, 'i can try fixing this') || 
-          contains(github.event.comment.body, 'i am interested in doing this') || 
-          contains(github.event.comment.body, 'be assigned this') || 
-          contains(github.event.comment.body, 'i am interested in contributing'))) || 
-          github.event_name == 'schedule' || 
-          github.event_name == 'workflow_dispatch' ||
-          github.event_name == 'pull_request_review_comment'
-        runs-on: ubuntu-latest
-        steps:
-          - name: BLT Action
-            uses: OWASP-BLT/BLT-Action@main
-            with:
-              # GitHub token is automatically available - no need to create a secret
-              repo-token: ${{ secrets.GITHUB_TOKEN }}
-              # Repository identifier is automatically provided by GitHub
-              repository: ${{ github.repository }}
-              # Giphy API key must be added as a repository secret
-              giphy-api-key: ${{ secrets.GIPHY_API_KEY }}
-    
-    ```
+Navigate to your repository and create the following workflow file at `.github/workflows/blt-action.yml`:
+```yml
+name: Auto Assign Issues
 
+on:
+  issue_comment:
+    types: [created]
+  pull_request_review_comment:
+    types: [created]
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch:
 
-### Usage
+jobs:
+  auto-assign:
+    if: >
+      (github.event_name == 'issue_comment' && (
+      contains(github.event.comment.body, '/assign') || 
+      startsWith(github.event.comment.body, '/unassign') || 
+      startsWith(github.event.comment.body, '/giphy') || 
+      startsWith(github.event.comment.body, '/kudos') || 
+      startsWith(github.event.comment.body, '/tip') || 
+      contains(github.event.comment.body, 'assign to me') || 
+      contains(github.event.comment.body, 'assign this to me') || 
+      contains(github.event.comment.body, 'assign it to me') || 
+      contains(github.event.comment.body, 'assign me this') || 
+      contains(github.event.comment.body, 'work on this') || 
+      contains(github.event.comment.body, 'i can try fixing this') || 
+      contains(github.event.comment.body, 'i am interested in doing this') || 
+      contains(github.event.comment.body, 'be assigned this') || 
+      contains(github.event.comment.body, 'i am interested in contributing'))) || 
+      github.event_name == 'schedule' || 
+      github.event_name == 'workflow_dispatch' ||
+      github.event_name == 'pull_request_review_comment'
+    runs-on: ubuntu-latest
+    steps:
+      - name: BLT Action
+        uses: OWASP-BLT/BLT-Action@main
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          giphy-api-key: ${{ secrets.GIPHY_API_KEY }}
+```
 
-#### Assignment Commands
-- **Self-assign to an issue**: Comment any of these on an issue:
-  - `/assign`
-  - `assign to me`
-  - `assign this to me`
-  - `work on this`
-  - `i can try fixing this`
-  - `i am interested in doing this`
-  - `i am interested in contributing`
-  
-  The action will:
-  - Check if you have any other open assigned issues without pull requests
-  - Assign you if eligible and add an "assigned" label
-  - Give you 24 hours to submit a pull request
+---
 
-  **Note**: Only human users can use assignment commands. Bot accounts and GitHub Apps are automatically excluded from assignment/unassignment.
-  
-- **Unassign yourself**: Comment `/unassign` on the issue
-  - Removes you from the issue
-  - Removes the "assigned" label
-  - Makes the issue available for others
+## Usage
 
-#### Fun & Engagement Commands
-- **Post a GIF**: Comment `/giphy [search term]`
-  - Example: `/giphy celebration`
-  - Posts an animated GIF from Giphy matching your search term
-  - Works on both issues and pull request comments
-  - Shows a message if no GIF is found for the search term
-  
-- **Send Kudos**: Comment `/kudos @username [optional message]`
-  - Example: `/kudos @alice great work on the PR!`
-  - Posts kudos publicly on the issue/PR for everyone to see
-  - Works with any GitHub username - no BLT account required!
-  - If the recipient has a [BLT profile](https://owaspblt.org), kudos are automatically tracked there
-  - If they don't have a BLT profile yet, they'll be encouraged to create one to track all their kudos
-  - Works on both issues and pull request comments
+### Assignment Commands
 
-- **Send Tips**: Comment `/tip @username $amount`
-  - Example: `/tip @contributor $10`
-  - Generates a direct link to the contributor's GitHub Sponsors page
-  - Supports any amount (e.g., `$5`, `$10.50`, `$100`)
-  - Validates that the recipient has GitHub Sponsors enabled
-  - Provides clear instructions for completing the one-time payment
-  - Works on both issues and pull request comments
-  - Note: Due to GitHub API limitations, tips cannot be sent automatically and require manual completion on the GitHub Sponsors page
+Comment any of the following on an issue to self-assign:
 
-#### Automated Features
-- **Stale Issue Unassignment**: If an issue remains inactive for 24 hours without a linked pull request, the action automatically:
-  - Unassigns the user
-  - Removes the "assigned" label
-  - Posts a notification that the issue is available again
-  - Runs daily via scheduled workflow (cron: `'0 0 * * *'`)
-  - Can also be triggered manually via workflow_dispatch
-  - Checks issue timeline for cross-referenced PRs to prevent premature unassignment
-  - Avoids duplicate unassignment notifications
+- `/assign`
+- `assign to me`
+- `assign this to me`
+- `assign it to me`
+- `assign me this`
+- `work on this`
+- `i can try fixing this`
+- `i am interested in doing this`
+- `i am interested in contributing`
 
-- **Assignment Protection**: Users cannot be assigned to new issues if they have existing assigned issues without open pull requests.
-  - Lists all blocking issues in the response message
-  - Prevents users from hoarding issues without active work
+Upon assignment the action will verify that you have no other open assigned issues without pull requests, assign you to the issue, add an `assigned` label, and give you 24 hours to submit a pull request.
 
-- **Duplicate Assignment Prevention**: The action prevents multiple users from being assigned to the same issue and notifies if an issue is already claimed.
+To release an issue, comment `/unassign`. The action will remove you from the issue, remove the `assigned` label, and make the issue available for others.
+
+Note: Assignment commands are restricted to human users. Bot accounts and GitHub Apps are automatically excluded.
+
+### Engagement Commands
+
+**Post a GIF**
+
+Comment `/giphy [search term]` on any issue or pull request.
+
+Example: `/giphy celebration`
+
+**Send Kudos**
+
+Comment `/kudos @username [optional message]` to publicly recognize a contributor.
+
+Example: `/kudos @alice great work on this pull request`
+
+If the recipient has an OWASP BLT profile, kudos are automatically tracked there. If not, they will be encouraged to create one.
+
+**Send a Tip**
+
+Comment `/tip @username $amount` to support a contributor financially via GitHub Sponsors.
+
+Example: `/tip @contributor $10`
+
+The action generates a direct link to the recipient's GitHub Sponsors page. Due to GitHub API limitations, the payment must be completed manually.
+
+### Automated Unassignment
+
+If an issue remains inactive for 24 hours without a linked pull request, the action automatically unassigns the contributor, removes the `assigned` label, and posts a notification that the issue is available again.
+
+---
 
 ## Implementation Details
 
 ### Attribution
-All comments generated by the BLT-Action include an attribution footer:
+
+All comments generated by BLT-Action include the following footer for transparency:
 ```
 ---
-*This comment was generated by [OWASP BLT-Action](https://github.com/OWASP-BLT/BLT-Action)*
+This comment was generated by OWASP BLT-Action — https://github.com/OWASP-BLT/BLT-Action
 ```
-This ensures transparency and helps users understand that comments are automated.
 
 ### Event Triggers
-The action responds to the following GitHub events:
-- `issue_comment.created`: For commands on issue and PR comments
-- `pull_request_review_comment.created`: For commands on PR review comments
-- `schedule`: Daily cron job for stale issue checking
-- `workflow_dispatch`: Manual trigger option
+
+| Event | Purpose |
+|-------|---------|
+| `issue_comment.created` | Processes commands on issue and PR comments |
+| `pull_request_review_comment.created` | Processes commands on PR review comments |
+| `schedule` | Daily cron job for stale issue detection |
+| `workflow_dispatch` | Manual trigger for on-demand execution |
 
 ### Label Management
-The action automatically manages an "assigned" label:
-- Added when a user is successfully assigned to an issue
-- Removed when a user is unassigned (manually or automatically)
-- Used to track which issues are actively claimed
+
+The action automatically manages an `assigned` label across issues. The label is added when a contributor is successfully assigned and removed upon unassignment, whether manual or automatic.
 
 ### API Integrations
-- **GitHub API**: Uses `@actions/github` with the provided `GITHUB_TOKEN` for all GitHub operations
-- **Giphy API**: Requires a free API key from https://developers.giphy.com/
-- **OWASP BLT Team API**: Sends kudos data to https://owaspblt.org/teams/give-kudos/
+
+| Integration | Purpose |
+|-------------|---------|
+| GitHub API | All GitHub operations via `@actions/github` with `GITHUB_TOKEN` |
+| Giphy API | GIF retrieval — requires a free API key from developers.giphy.com |
+| OWASP BLT API | Kudos tracking at owaspblt.org |
+
+---
 
 ## Contributing
 
-Contributions are what make the open-source community an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
+Contributions are welcome and greatly appreciated. To contribute:
 
-1. **Find an Issue**:
-   - Check the [issues page](../issues) of the BLT-Action repository.
-   - Choose an issue you would like to work on.
+1. Check the [issues page](../issues) for something you would like to work on
+2. Fork the repository to your GitHub account
+3. Create a feature branch: `git checkout -b feature/your-feature-name`
+4. Commit your changes: `git commit -m "Add: description of your change"`
+5. Push to your branch: `git push origin feature/your-feature-name`
+6. Open a pull request from your fork to the original repository
 
-2. **Fork the Project**:
-   - Fork the repository to your GitHub account.
+---
 
-3. **Create your Feature Branch**:
-   - `git checkout -b feature/AmazingFeature`
+## License
 
-4. **Commit your Changes**:
-   - `git commit -m 'Add some AmazingFeature'`
-
-5. **Push to the Branch**:
-   - `git push origin feature/AmazingFeature`
-
-6. **Open a Pull Request**:
-   - Once you've pushed your new branch, create a new Pull Request from your forked repository to the original BLT-Action repository.
-
+This project is maintained by the OWASP BLT team. See the repository for license details.
