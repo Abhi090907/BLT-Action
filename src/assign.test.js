@@ -30,7 +30,7 @@ describe('Assignment Command Tests', () => {
     const result = await assignUserToIssue(owner, repo, issueNumber, username);
 
     // Fix: Updated the assertion to check the new array format
-    assert.strictEqual(result.assignees.login, username, 'The returned username should match our input');
+    assert.strictEqual(result.assignees[0].login, username, 'The returned username should match our input');
     assert.ok(githubApiMock.isDone(), 'The GitHub API mock should have been called exactly once');
   });
 });
