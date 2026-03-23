@@ -185,6 +185,7 @@ or
 ##### Sending a Tip
 
 `/tip @username $10`
+
 ---
 
 #### Assignment Commands
