@@ -152,9 +152,9 @@ To use the `/giphy` command:
 
 ### Usage
 
-## Command Examples
+#### Command Examples
 
-### Assigning an Issue
+##### Assigning an Issue
 
 `/assign`
 
@@ -164,27 +164,28 @@ or
 
 ---
 
-### Unassigning Yourself
+##### Unassigning Yourself
 
 `/unassign`
 
 ---
 
-### Posting a GIF
+##### Posting a GIF
 
 `/giphy celebration`
 
 ---
 
-### Sending Kudos
+##### Sending Kudos
 
 `/kudos @username great work!`
 
 ---
 
-### Sending a Tip
+##### Sending a Tip
 
 `/tip @username $10`
+---
 
 #### Assignment Commands
 - **Self-assign to an issue**: Comment any of these on an issue:
