@@ -266,3 +266,40 @@ Contributions are what make the open-source community an amazing place to learn,
 6. **Open a Pull Request**:
    - Once you've pushed your new branch, create a new Pull Request from your forked repository to the original BLT-Action repository.
 
+## Troubleshooting
+
+### Commands not working
+
+- Ensure the workflow file is correctly added under `.github/workflows/`
+- Check that the workflow has been triggered at least once
+- Verify that your comment matches one of the supported command formats
+
+---
+
+### Assignment not happening
+
+- Make sure you are not already assigned to another issue without an open pull request
+- Check if the issue is already assigned to someone else
+- Ensure you are commenting on an issue (not a pull request)
+
+---
+
+### GIF command not working
+
+- Confirm that the `GIPHY_API_KEY` is correctly set in repository secrets
+- Ensure the API key is valid and active
+
+---
+
+### Workflow not triggering
+
+- Verify that GitHub Actions are enabled in the repository
+- Check the Actions tab for any failed runs
+- Ensure the workflow file syntax is correct
+
+---
+
+### Permissions issues
+
+- Ensure the repository has proper permissions for GitHub Actions
+- Confirm that the default `GITHUB_TOKEN` is available
